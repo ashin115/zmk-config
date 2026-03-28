@@ -1,12 +1,15 @@
 include:
-  # 1. The Central Dongle (Xiao BLE + Cradio Dongle Shield + Prospector Display)
+  # 1. The Central Dongle (Seeed Xiao BLE)
   - board: xiao_ble//zmk
     shield: cradio_dongle prospector_adapter
-  
-  # 2. Left Peripheral 
-  - board: nice_nano//zmk# e.g., nice_nano_v2 or xiao_ble
+    artifact-name: cradio_dongle
+
+  # 2. Left Half (nice!nano v2)
+  - board: nice_nano_v2//zmk
     shield: cradio_left
-  
-  # 3. Right Peripheral
-  - board: nice_nano//zmk
+    artifact-name: cradio_left
+
+  # 3. Right Half (nice!nano v2)
+  - board: nice_nano_v2//zmk
     shield: cradio_right
+    artifact-name: cradio_right
