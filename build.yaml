@@ -1,15 +1,21 @@
 include:
-  # 1. The Central Dongle (Seeed Xiao BLE)
+  # Dongle (Seeed Xiao BLE)
   - board: xiao_ble//zmk
     shield: cradio_dongle prospector_adapter
-    artifact-name: cradio_dongle
+    artifact-name: dongle_xiao
 
-  # 2. Left Half (nice!nano v2)
-  - board: nice_nano_v2//zmk
+  # Settings Reset (Flash this to all 3 first if pairing fails)
+  - board: nice_nano//zmk
+    shield: settings_reset
+    artifact-name: reset_nicenano
+
+  # Left Half (nice!nano v2)
+  - board: nice_nano//zmk
     shield: cradio_left
-    artifact-name: cradio_left
+    artifact-name: left_half
 
-  # 3. Right Half (nice!nano v2)
-  - board: nice_nano_v2//zmk
+  # Right Half (nice!nano v2)
+  - board: nice_nano//zmk
     shield: cradio_right
-    artifact-name: cradio_right
+    artifact-name: right_half
+
