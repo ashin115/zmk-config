@@ -1,18 +1,25 @@
+---
 include:
-  # Dongle (Xiao BLE)
+  # Dongle (Xiao BLE) — central with display
   - board: xiao_ble//zmk
     shield: cradio_dongle prospector_adapter
     artifact-name: dongle_xiao
-    # This line fixes the 'undeclared' error by defining the old symbol 
-    # as the value of the new config (which is 2 for a split keyboard).
-    cmake-args: -DCONFIG_ZMK_CPP_FLAGS="-DZMK_SPLIT_BLE_PERIPHERAL_COUNT=CONFIG_ZMK_SPLIT_BLE_CENTRAL_PERIPHERALS"
 
-  # Left Half (nice!nano)
+  # Left Half (nice!nano v2) — peripheral
   - board: nice_nano//zmk
     shield: cradio_left
     artifact-name: left_half
 
-  # Right Half (nice!nano)
+  # Right Half (nice!nano v2) — peripheral
   - board: nice_nano//zmk
     shield: cradio_right
     artifact-name: right_half
+
+  # Settings reset firmware (useful for re-pairing)
+  - board: xiao_ble//zmk
+    shield: settings_reset
+    artifact-name: reset_dongle
+
+  - board: nice_nano//zmk
+    shield: settings_reset
+    artifact-name: reset_halves
