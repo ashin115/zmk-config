@@ -50,10 +50,9 @@
         };
 
         // Caps word — capitalises until a non-alpha/non-allowed key is pressed
-        caps_word: caps_word {
+        ccaps_word: caps_word {
             compatible = "zmk,behavior-caps-word";
             #binding-cells = <0>;
-            continue-while-held;
         };
 
         // Repeat last key — avoids awkward double-taps (e.g. "ll", "ss")
@@ -124,7 +123,7 @@
         combo_caps {
             timeout-ms = <30>;
             key-positions = <22 23>;
-            bindings = <&caps_word>;
+            bindings = <&ccaps_word>;
         };
     };
 
@@ -170,7 +169,7 @@
             &kp DEL    &kp C_MUTE &kp C_VOL_DN &kp C_VOL_UP &kp ESC  &kp LEFT   &kp DOWN   &kp UP     &kp RIGHT  &kp SEMI
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
         //│ CAPS_WRD │  REPEAT  │  BRI-    │  BRI+    │  REPEAT  │   │  HOME    │  PG_DN   │  PG_UP   │  END     │          │
-            &caps_word &rpt       &kp C_BRI_DN &kp C_BRI_UP &rpt      &kp HOME   &kp PG_DN  &kp PG_UP  &kp END    &trans
+            &ccaps_word &rpt       &kp C_BRI_DN &kp C_BRI_UP &rpt      &kp HOME   &kp PG_DN  &kp PG_UP  &kp END    &trans
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
         //                                 │          │          │   │ [held]   │          │
                                              &trans     &trans         &trans     &trans
