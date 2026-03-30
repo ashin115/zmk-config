@@ -1,17 +1,23 @@
 // Copyright (c) 2022 The ZMK Contributors
 // SPDX-License-Identifier: MIT
 
-// ─── C / General Coding Optimised Keymap ──────────────────────────────────────
+// ─── C / General Coding Optimised Keymap  (macOS) ────────────────────────────
 //
 // Key ideas:
-//  • Bracket-escape macros  — type the pair and land OUTSIDE: () [] {} "" '' ``
+//  • Bracket-escape macros  — type the pair and land INSIDE: () [] {} "" '' ``
+//  • EXIT→→ macro           — double RIGHT, hops past closing bracket/quote
+//                             available on: Sym layer inner thumb (pos 32),
+//                             Num layer outer thumb (pos 33), Mod layer thumb
 //  • C-specific macros      — -> /* */ // #include <> #define printf("")
 //  • Comparison macros      — != == >= <=  (saves shift + combo fumbling)
 //  • Combos on natural rolls — SD=Esc JK=Tab CV=CapsWord DF=Colon
-//                             QW=Undo  WE=Redo  ZX=Save  FG=->  VB=/**/
-//  • Symbols layer          — grouped by C operator family, not ANSI layout
-//  • Num layer              — numbers + nav + Ctrl shortcuts (copy/paste/etc.)
-//  • Mod layer (toggle)     — one-shot mods + editor shortcuts
+//                             QW=Undo(⌘Z)  WE=Redo(⌘⇧Z)  ZX=Save(⌘S)
+//                             VB=/**/  NM=!=  HJ===  UI={}  IO=[]  OP=()
+//                             XC=""  30+31=//
+//  • All shortcuts use Cmd (⌘) not Ctrl — macOS native
+//  • Symbols layer          — grouped by C operator family
+//  • Num layer              — numbers + nav + ⌘ shortcuts + EXIT thumb
+//  • Mod layer (toggle)     — one-shot mods + editor shortcuts (⌘-based)
 //  • Config layer           — BT + F-keys (tri-layer: both thumbs held)
 //
 // Layer index:
@@ -163,17 +169,15 @@
         };
 
         // ── Exit bracket — jump PAST closing bracket / quote ──────────────────
-        // Useful after auto-complete fills the closing bracket.
-        // Sends End-of-token: RIGHT arrow (move out of current bracket).
-        // Bind this on a combo or thumb for one-key escape.
+        // Double RIGHT: first skips the closing bracket the macro typed,
+        // second clears any editor-inserted closing bracket (e.g. nvim-autopairs,
+        // VS Code, CLion). Two presses covers both manual and auto-paired cases.
         m_exit: macro_exit_bracket {
             compatible = "zmk,behavior-macro";
             #binding-cells = <0>;
             wait-ms = <15>;
             tap-ms = <15>;
-            bindings = <&kp RIGHT>;
-            // Simple — just one RIGHT. Editors like VS Code / CLion /
-            // Neovim (with nvim-autopairs) will skip the closing bracket.
+            bindings = <&kp RIGHT &kp RIGHT>;
         };
 
         // ── C-specific snippets ────────────────────────────────────────────────
@@ -390,21 +394,21 @@
         combo_undo {
             timeout-ms = <30>;
             key-positions = <0 1>;
-            bindings = <&kp LC(Z)>;
+            bindings = <&kp LG(Z)>;
         };
 
-        // WE (pos 1+2) → Redo  (Ctrl+Y / Ctrl+Shift+Z)
+        // WE (pos 1+2) → Redo  (Cmd+Shift+Z on Mac)
         combo_redo {
             timeout-ms = <30>;
             key-positions = <1 2>;
-            bindings = <&kp LC(Y)>;
+            bindings = <&kp LG(LS(Z))>;
         };
 
-        // ZX (pos 20+21) → Save  (Ctrl+S — muscle memory critical)
+        // ZX (pos 20+21) → Save  (Cmd+S on Mac)
         combo_save {
             timeout-ms = <30>;
             key-positions = <20 21>;
-            bindings = <&kp LC(S)>;
+            bindings = <&kp LG(S)>;
         };
 
         // FG (pos 14+4... wait — F=pos13 G=pos14) → ->  (C arrow access)
@@ -462,14 +466,6 @@
             bindings = <&m_brc>;
         };
 
-        // Right thumb inner+outer (pos 32+33) → Exit bracket (RIGHT arrow)
-        // Tap both right thumb keys to hop out of any closing bracket/quote.
-        combo_exit {
-            timeout-ms = <50>;
-            key-positions = <32 33>;
-            bindings = <&m_exit>;
-        };
-
         // Left thumb inner+outer (pos 30+31) → //  line comment
         combo_line_comment {
             timeout-ms = <50>;
@@ -519,7 +515,7 @@
             &kp Z      &kp X      &kp C      &kp V      &kp B          &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
         //                                 │ SK LSHFT │ ENTER/2  │   │ SPACE/1  │  BSPC    │
-        //                                 │[30+31=//]│          │   │          │[32+33=→] │
+        //                                 │[30+31=//]│          │   │          │          │
                                              &sk LSHFT  &lt 2 ENTER   &lt 1 SPACE &kp BSPC
         //                                 ╰──────────┴──────────╯   ╰──────────┴──────────╯
             >;
@@ -529,8 +525,8 @@
         // │  Layer 1 — Numbers + Navigation  (right thumb hold)                │
         // │                                                                     │
         // │  Top row   : 1–0 (number row)                                      │
-        // │  Home row  : editor shortcuts + arrow keys                          │
-        // │  Bottom row: extra nav + Ctrl shortcuts                             │
+        // │  Home row  : media + arrow keys                                     │
+        // │  Bottom row: Mac shortcuts (Cmd) + nav + m_exit on right thumb      │
         // └─────────────────────────────────────────────────────────────────────┘
         right_layer {
             display-name = "Num";
@@ -542,12 +538,12 @@
         //│  DEL     │  MUTE    │  VOL-    │  VOL+    │  ESC     │   │  ←       │  ↓       │  ↑       │  →       │  ;       │
             &kp DEL    &kp C_MUTE &kp C_VOL_DN &kp C_VOL_UP &kp ESC  &kp LEFT   &kp DOWN   &kp UP     &kp RIGHT  &kp SEMI
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│ CTRL+Z   │ CTRL+X   │ CTRL+C   │ CTRL+V   │ CTRL+A   │   │  HOME    │  PG_DN   │  PG_UP   │  END     │ CTRL+/   │
+        //│ CMD+Z    │ CMD+X    │ CMD+C    │ CMD+V    │ CMD+A    │   │  HOME    │  PG_DN   │  PG_UP   │  END     │ CMD+/    │
         //│ Undo     │ Cut      │ Copy     │ Paste    │ Select All│  │          │          │          │          │ Comment  │
-            &kp LC(Z)  &kp LC(X)  &kp LC(C)  &kp LC(V)  &kp LC(A)      &kp HOME   &kp PG_DN  &kp PG_UP  &kp END   &kp LC(FSLH)
+            &kp LG(Z)  &kp LG(X)  &kp LG(C)  &kp LG(V)  &kp LG(A)      &kp HOME   &kp PG_DN  &kp PG_UP  &kp END   &kp LG(FSLH)
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
-        //                                 │          │          │   │ [held]   │          │
-                                             &trans     &trans         &trans     &trans
+        //                                 │          │          │   │ [held]   │ EXIT→→   │
+                                             &trans     &trans         &trans     &m_exit
         //                                 ╰──────────┴──────────╯   ╰──────────┴──────────╯
             >;
         };
@@ -556,9 +552,10 @@
         // │  Layer 2 — Symbols  (left thumb hold)                              │
         // │                                                                     │
         // │  Grouped by C operator family:                                      │
-        // │  Top row   : bracket pairs (auto-close macros) + ! ?               │
-        // │  Home row  : arithmetic + comparison operators                      │
+        // │  Top row   : bracket pairs (auto-close macros) + comparisons        │
+        // │  Home row  : arithmetic + pointer/scope operators                   │
         // │  Bottom row: bitwise / preprocessor / misc                          │
+        // │  Right thumb: EXIT→→ (hop past closing bracket)                    │
         // └─────────────────────────────────────────────────────────────────────┘
         left_layer {
             display-name = "Symbols";
@@ -576,8 +573,8 @@
         //│ bitNOT   │ bitXOR   │ bitOR    │ escape   │ preproc  │   │ backtick │ underscore│ NOT/excl│ ternary  │          │
             &kp TILDE  &kp CARET  &kp PIPE   &kp BSLH   &kp HASH       &kp GRAVE  &kp UNDER  &kp EXCL   &kp QMARK  &kp AT
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
-        //                                 │ [held]   │          │   │          │          │
-                                             &trans     &trans         &trans     &trans
+        //                                 │ [held]   │          │   │ EXIT→→   │          │
+                                             &trans     &trans         &m_exit    &trans
         //                                 ╰──────────┴──────────╯   ╰──────────┴──────────╯
             >;
         };
@@ -617,13 +614,13 @@
         //│ #include │ #define  │  ()      │  []      │  {}      │   │  NULL    │          │          │          │          │
             &m_inc     &m_def     &m_par     &m_bkt     &m_brc         &m_null    &sk RGUI   &sk RCTRL  &sk RALT   &sk RSHFT
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  m_printf│  m_arrow │  m_deq   │  m_neq   │  m_blk   │   │ CTRL+D   │ CTRL+F   │ CTRL+G   │ CTRL+W   │ CTRL+/   │
+        //│  m_printf│  m_arrow │  m_deq   │  m_neq   │  m_blk   │   │ CMD+D    │ CMD+F    │ CMD+G    │ CMD+W    │ CMD+/    │
         //│ printf("")│  ->     │  ==      │  !=      │  /* */   │   │ Duplicate│  Find    │ FindNext │ CloseTab │ Comment  │
-            &m_printf  &m_arrow   &m_deq     &m_neq     &m_blk_comment &kp LC(D)  &kp LC(F)  &kp LC(G)  &kp LC(W)  &kp LC(FSLH)
+            &m_printf  &m_arrow   &m_deq     &m_neq     &m_blk_comment &kp LG(D)  &kp LG(F)  &kp LG(G)  &kp LG(W)  &kp LG(FSLH)
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  m_leq   │  m_geq   │  m_scope │ m_fat_arr│ m_line_c │   │ CTRL+Z   │ CTRL+Y   │ CTRL+S   │ CTRL+P   │  tog 4   │
+        //│  m_leq   │  m_geq   │  m_scope │ m_fat_arr│ m_line_c │   │ CMD+Z    │ CMD+SHF+Z│ CMD+S    │ CMD+P    │  tog 4   │
         //│  <=      │  >=      │  ::      │  =>      │  //      │   │  Undo    │  Redo    │  Save    │ CmdPalet │ [exit]   │
-            &m_leq     &m_geq     &m_scope   &m_fat_arrow &m_line_comment &kp LC(Z) &kp LC(Y) &kp LC(S) &kp LC(P)  &tog 4
+            &m_leq     &m_geq     &m_scope   &m_fat_arrow &m_line_comment &kp LG(Z) &kp LG(LS(Z)) &kp LG(S) &kp LG(P)  &tog 4
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
         //                                 │          │          │   │          │  EXIT→   │
                                              &trans     &trans         &trans     &m_exit
