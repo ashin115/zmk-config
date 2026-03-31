@@ -5,17 +5,22 @@
 //
 // Key ideas:
 //  • Bracket-escape macros  — type the pair and land INSIDE: () [] {} "" '' ``
+//  • Individual bracket keys — single ( ) [ ] { } on Symbols layer top row
 //  • EXIT→→ macro           — double RIGHT, hops past closing bracket/quote
 //                             available on: Sym layer inner thumb (pos 32),
 //                             Num layer outer thumb (pos 33), Mod layer thumb
 //  • C-specific macros      — -> /* */ // #include <> #define printf("")
 //  • Comparison macros      — != == >= <=  (saves shift + combo fumbling)
-//  • Combos on natural rolls — SD=Esc JK=Tab CV=CapsWord DF=Colon
+//  • Cmd+Tab macro          — app switcher (m_cmd_tab)
+//  • Ctrl+Opt macro         — IDE modifier combo (m_ctrl_opt), useful for
+//                             IntelliJ/CLion keybindings that use ⌃⌥ prefix
+//  • Combos on natural rolls — SD=Esc JK=Tab CV=CapsWord
 //                             QW=Undo(⌘Z)  WE=Redo(⌘⇧Z)  ZX=Save(⌘S)
 //                             VB=/**/  NM=!=  HJ===  UI={}  IO=[]  OP=()
-//                             XC=""  30+31=//
+//                             XC=""  30+31=//  DF=Colon  ,. = Semicolon
 //  • All shortcuts use Cmd (⌘) not Ctrl — macOS native
-//  • Symbols layer          — grouped by C operator family
+//  • Symbols layer          — row 0: pair-macros | row 1: arithmetic+pointers
+//                             row 2: bitwise/misc | RIGHT side top: indiv brackets
 //  • Num layer              — numbers + nav + ⌘ shortcuts + EXIT thumb
 //  • Mod layer (toggle)     — one-shot mods + editor shortcuts (⌘-based)
 //  • Config layer           — BT + F-keys (tri-layer: both thumbs held)
@@ -103,10 +108,6 @@
     //
     // Bracket-escape pattern:
     //   open + close bracket, then LEFT arrow → cursor is now INSIDE.
-    //   For "exit bracket" variants: open + close, cursor stays OUTSIDE.
-    //
-    // We follow the "inside" convention by default (most useful while coding):
-    //   type the macro → you are positioned inside, ready to fill in.
     //
     // tap-ms / wait-ms = 15 ms keeps HID events ordered over BLE.
 
@@ -317,6 +318,44 @@
             tap-ms = <15>;
             bindings = <&kp COLON &kp COLON>;
         };
+
+        // ── NEW: OS / IDE modifier macros ──────────────────────────────────────
+
+        // Cmd+Tab — macOS app switcher (tap to invoke, keep tapping for next app)
+        // Note: holding Cmd while tapping Tab repeatedly is done at the OS level;
+        // this macro fires a single ⌘Tab event which opens the switcher or cycles.
+        m_cmd_tab: macro_cmd_tab {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <15>;
+            tap-ms = <15>;
+            bindings = <&kp LG(TAB)>;
+        };
+
+        // Ctrl+Opt (⌃⌥) — pressed together as a chord prefix.
+        // Useful for IDE keybindings in CLion/IntelliJ/VS Code that use ⌃⌥ prefix.
+        // This presses both mods simultaneously then releases, acting as a one-shot
+        // modifier-pair tap. Chain it before a letter key to fire ⌃⌥<key> combos.
+        m_ctrl_opt: macro_ctrl_opt {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <15>;
+            tap-ms = <15>;
+            bindings =
+                <&macro_press   &kp LCTRL &kp LALT>,
+                <&macro_pause_for_release>,
+                <&macro_release &kp LCTRL &kp LALT>;
+        };
+
+        // Cmd+Shift+P — command palette (VS Code, IntelliJ, etc.)
+        // (already in Mod layer as kp LG(P) — kept as macro alias for clarity)
+        m_cmd_pal: macro_cmd_palette {
+            compatible = "zmk,behavior-macro";
+            #binding-cells = <0>;
+            wait-ms = <15>;
+            tap-ms = <15>;
+            bindings = <&kp LG(LS(P))>;
+        };
     };
 
     // ── Conditional layers ────────────────────────────────────────────────────
@@ -330,12 +369,16 @@
 
     // ── Combos ────────────────────────────────────────────────────────────────
     //
-    // Design rules applied here:
-    //  • timeout ≤ 30 ms — only triggers on deliberate rolls, not accidental
-    //  • All combos are same-hand or cross-hand INWARD rolls where possible
+    // Design rules:
+    //  • timeout ≤ 30 ms — deliberate rolls only
+    //  • All combos are same-hand or cross-hand INWARD rolls
     //  • No combo steals a key you'd normally hold/repeat quickly
+    //  • combo_arrow (DF) and combo_colon (DF) CONFLICT — colon wins on base,
+    //    arrow is available as m_arrow on Symbols layer home row pos 5 (->)
+    //    and on Mod layer. Remove combo_colon and uncomment combo_arrow if
+    //    you prefer arrow on DF.
     //
-    // Position map reminder:
+    // Position map:
     //  0  1  2  3  4    5  6  7  8  9
     // 10 11 12 13 14   15 16 17 18 19
     // 20 21 22 23 24   25 26 27 28 29
@@ -344,7 +387,7 @@
     combos {
         compatible = "zmk,combos";
 
-        // ── Existing combos (kept, they are good) ─────────────────────────────
+        // ── Home-row utility combos ────────────────────────────────────────────
 
         // SD (pos 12+13) → Escape
         combo_esc {
@@ -360,13 +403,6 @@
             bindings = <&kp TAB>;
         };
 
-        // ,. (pos 27+28) → Semicolon  — end of C statement!
-        combo_semi {
-            timeout-ms = <30>;
-            key-positions = <27 28>;
-            bindings = <&kp SEMI>;
-        };
-
         // JKL (pos 16+17+18) → Toggle mod layer 4
         combo_mod {
             timeout-ms = <30>;
@@ -374,7 +410,7 @@
             bindings = <&tog 4>;
         };
 
-        // DF (pos 13+14) → Colon
+        // DF (pos 13+14) → Colon  ← keeps this; see note above re: arrow conflict
         combo_colon {
             timeout-ms = <30>;
             key-positions = <13 14>;
@@ -388,97 +424,116 @@
             bindings = <&ccaps_word>;
         };
 
-        // ── New coding combos ──────────────────────────────────────────────────
+        // ,. (pos 27+28) → Semicolon  — end of C statement
+        combo_semi {
+            timeout-ms = <30>;
+            key-positions = <27 28>;
+            bindings = <&kp SEMI>;
+        };
 
-        // QW (pos 0+1) → Undo  (Ctrl+Z, left hand, easy top-left roll)
+        // ── Top-row editing combos (left hand) ────────────────────────────────
+
+        // QW (pos 0+1) → Undo  (⌘Z)
         combo_undo {
             timeout-ms = <30>;
             key-positions = <0 1>;
             bindings = <&kp LG(Z)>;
         };
 
-        // WE (pos 1+2) → Redo  (Cmd+Shift+Z on Mac)
+        // WE (pos 1+2) → Redo  (⌘⇧Z)
         combo_redo {
             timeout-ms = <30>;
             key-positions = <1 2>;
             bindings = <&kp LG(LS(Z))>;
         };
 
-        // ZX (pos 20+21) → Save  (Cmd+S on Mac)
+        // ZX (pos 20+21) → Save  (⌘S)
         combo_save {
             timeout-ms = <30>;
             key-positions = <20 21>;
             bindings = <&kp LG(S)>;
         };
 
-        // FG (pos 14+4... wait — F=pos13 G=pos14) → ->  (C arrow access)
-        // F is position 13, G is position 14 — comfortable index-to-index roll
-        combo_arrow {
-            timeout-ms = <30>;
-            key-positions = <13 14>;
-            bindings = <&m_arrow>;
-            // NOTE: This overlaps with combo_colon above!
-            // Choose one — we keep m_arrow (more C-useful) and put : on the
-            // Symbols layer instead.  Remove combo_colon if you use this.
-            // DISABLED — see combo_colon. Uncomment and remove combo_colon to use.
-            // key-positions = <13 14>;
-        };
+        // ── Symbol combos (right hand top row) ────────────────────────────────
+        // These fire pair-macros (cursor lands INSIDE the pair).
 
-        // VB (pos 23+24) → /* */  block comment opener
-        combo_blk_comment {
-            timeout-ms = <30>;
-            key-positions = <23 24>;
-            bindings = <&m_blk_comment>;
-        };
-
-        // NM (pos 25+26) → !=  (not-equal, right hand, very common in C if-stmts)
-        combo_neq {
-            timeout-ms = <30>;
-            key-positions = <25 26>;
-            bindings = <&m_neq>;
-        };
-
-        // HJ (pos 15+16) → ==  (equality, right hand home row inward roll)
-        combo_deq {
-            timeout-ms = <30>;
-            key-positions = <15 16>;
-            bindings = <&m_deq>;
-        };
-
-        // OP (pos 8+9) → ()  brackets — top right, fast to reach
+        // OP (pos 8+9) → ()  parens pair
         combo_parens {
             timeout-ms = <30>;
             key-positions = <8 9>;
             bindings = <&m_par>;
         };
 
-        // IO (pos 7+8) → []  square brackets
+        // IO (pos 7+8) → []  square brackets pair
         combo_brackets {
             timeout-ms = <30>;
             key-positions = <7 8>;
             bindings = <&m_bkt>;
         };
 
-        // UI (pos 6+7) → {}  curly braces
+        // UI (pos 6+7) → {}  curly braces pair
         combo_braces {
             timeout-ms = <30>;
             key-positions = <6 7>;
             bindings = <&m_brc>;
         };
 
-        // Left thumb inner+outer (pos 30+31) → //  line comment
+        // ── Comment combos ────────────────────────────────────────────────────
+
+        // VB (pos 23+24) → /* */  block comment
+        combo_blk_comment {
+            timeout-ms = <30>;
+            key-positions = <23 24>;
+            bindings = <&m_blk_comment>;
+        };
+
+        // Both left thumbs (pos 30+31) → //  line comment
         combo_line_comment {
             timeout-ms = <50>;
             key-positions = <30 31>;
             bindings = <&m_line_comment>;
         };
 
-        // PQ column (pos 0+9) cross-hand not practical — skip
-        // Instead: XC (pos 21+22) → "" double-quote pair
+        // ── Comparison combos (right hand) ────────────────────────────────────
+
+        // NM (pos 25+26) → !=
+        combo_neq {
+            timeout-ms = <30>;
+            key-positions = <25 26>;
+            bindings = <&m_neq>;
+        };
+
+        // HJ (pos 15+16) → ==
+        combo_deq {
+            timeout-ms = <30>;
+            key-positions = <15 16>;
+            bindings = <&m_deq>;
+        };
+
+        // ── String combos ─────────────────────────────────────────────────────
+
+        // XC (pos 21+22) → ""  double-quote pair
         combo_dquotes {
             timeout-ms = <30>;
             key-positions = <21 22>;
             bindings = <&m_dqt>;
+        };
+
+        // ── NEW combos ────────────────────────────────────────────────────────
+
+        // RT (pos 3+4) → Cmd+Tab  — app switcher, left hand top row outward roll
+        combo_cmd_tab {
+            timeout-ms = <30>;
+            key-positions = <3 4>;
+            bindings = <&m_cmd_tab>;
+        };
+
+        // AS (pos 10+11) → Ctrl+Opt  — IDE modifier pair, left hand home row
+        // (A=pos10, S=pos11; both are HRM keys but combos fire before HRM)
+        combo_ctrl_opt {
+            timeout-ms = <30>;
+            key-positions = <10 11>;
+            bindings = <&m_ctrl_opt>;
         };
     };
 
@@ -496,22 +551,28 @@
         // Right thumb:    hold = Num layer (1),  tap = Space
         // Left thumb:     hold = Sym layer (2),  tap = Enter
         //                 Left outer = Sticky LSHFT
+        //
+        // Combos active on this layer (see combo section above):
+        //   SD=Esc  JK=Tab  JKL=Mod  DF=Colon  CV=CapsWord  ,.=Semi
+        //   QW=Undo  WE=Redo  ZX=Save  RT=CmdTab  AS=CtrlOpt
+        //   OP=()  IO=[]  UI={}  NM=!=  HJ===  XC=""
+        //   VB=/**/  30+31=//
 
         default_layer {
             display-name = "Base";
             bindings = <
         //╭──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────╮
         //│  Q       │  W       │  E       │  R       │  T       │   │  Y       │  U {}    │  I []    │  O ()    │  P       │
-        //│ [combo→] │ [QW=Undo]│ [WE=Redo]│          │          │   │          │[UI=brace]│[IO=bkt]  │[OP=paren]│          │
+        //│ [QW=Undo]│ [WE=Redo]│          │[RT=⌘Tab] │[RT=⌘Tab] │   │          │[UI=brace]│[IO=bkt]  │[OP=paren]│          │
             &kp Q      &kp W      &kp E      &kp R      &kp T          &kp Y      &kp U      &kp I      &kp O      &kp P
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
         //│  A       │  S       │  D       │  F       │  G       │   │  H       │  J       │  K       │  L       │  ' "     │
         //│ LSHFT    │ LALT     │ LCTRL    │ LGUI     │          │   │          │ RGUI     │ RCTRL    │ RALT     │ RSHFT    │
-        //│ [SD=Esc] │          │          │[DF=Colon]│          │   │[HJ==]    │[JK=Tab]  │[JKL=Mod] │          │          │
+        //│[AS=⌃⌥]  │          │[SD=Esc]  │[DF=Colon]│          │   │[HJ===]   │[JK=Tab]  │[JKL=Mod] │          │          │
             HRML(A,        S,         D,         F)     &kp G          &kp H      HRMR(J,        K,         L,        SQT)
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
         //│  Z       │  X       │  C       │  V       │  B       │   │  N       │  M       │ , <      │ . >      │ / ?      │
-        //│ [ZX=Save]│          │[CV=CWrd] │[VB=/**/] │          │   │[NM=!=]   │          │[,.=SEMI] │          │          │
+        //│ [ZX=Save]│[XC=""]   │[CV=CWrd] │[VB=/**/] │          │   │[NM=!=]   │          │[,.=SEMI] │          │          │
             &kp Z      &kp X      &kp C      &kp V      &kp B          &kp N      &kp M      &kp COMMA  &kp DOT    &kp FSLH
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
         //                                 │ SK LSHFT │ ENTER/2  │   │ SPACE/1  │  BSPC    │
@@ -538,9 +599,9 @@
         //│  DEL     │  MUTE    │  VOL-    │  VOL+    │  ESC     │   │  ←       │  ↓       │  ↑       │  →       │  ;       │
             &kp DEL    &kp C_MUTE &kp C_VOL_DN &kp C_VOL_UP &kp ESC  &kp LEFT   &kp DOWN   &kp UP     &kp RIGHT  &kp SEMI
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│ CMD+Z    │ CMD+X    │ CMD+C    │ CMD+V    │ CMD+A    │   │  HOME    │  PG_DN   │  PG_UP   │  END     │ CMD+/    │
+        //│ ⌘Z       │ ⌘X       │ ⌘C       │ ⌘V       │ ⌘A       │   │  HOME    │  PG_DN   │  PG_UP   │  END     │ ⌘/       │
         //│ Undo     │ Cut      │ Copy     │ Paste    │ Select All│  │          │          │          │          │ Comment  │
-            &kp LG(Z)  &kp LG(X)  &kp LG(C)  &kp LG(V)  &kp LG(A)      &kp HOME   &kp PG_DN  &kp PG_UP  &kp END   &kp LG(FSLH)
+            &kp LG(Z)  &kp LG(X)  &kp LG(C)  &kp LG(V)  &kp LG(A)     &kp HOME   &kp PG_DN  &kp PG_UP  &kp END   &kp LG(FSLH)
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
         //                                 │          │          │   │ [held]   │ EXIT→→   │
                                              &trans     &trans         &trans     &m_exit
@@ -551,30 +612,40 @@
         // ┌─────────────────────────────────────────────────────────────────────┐
         // │  Layer 2 — Symbols  (left thumb hold)                              │
         // │                                                                     │
-        // │  Grouped by C operator family:                                      │
-        // │  Top row   : bracket pairs (auto-close macros) + comparisons        │
-        // │  Home row  : arithmetic + pointer/scope operators                   │
-        // │  Bottom row: bitwise / preprocessor / misc                          │
-        // │  Right thumb: EXIT→→ (hop past closing bracket)                    │
+        // │  Layout after revamp:                                               │
+        // │                                                                     │
+        // │  LEFT HALF                         RIGHT HALF                       │
+        // │  ─────────────────────────────     ──────────────────────────────── │
+        // │  Top row  : pair-macros            individual brackets + `` pair    │
+        // │               ()  []  {}  ""  ''       (   )   [   ]  ``            │
+        // │  Home row : arithmetic + pointers   individual braces + comparisons │
+        // │               =   +   -   *   /       {   }  >=  <=  %             │
+        // │  Bot row  : bitwise / misc          comparison / misc               │
+        // │               ~   ^   |   \   #      !=  ==  ->  =>  ::            │
+        // │  Right thumb: EXIT→→                                                │
+        // │                                                                     │
+        // │  Key insight: individual brackets live on right side, mirroring     │
+        // │  their pair-macro partners on the left.  Both halves work together. │
         // └─────────────────────────────────────────────────────────────────────┘
         left_layer {
             display-name = "Symbols";
             bindings = <
         //╭──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────╮
-        //│  ()      │  []      │  {}      │  ""      │  ''      │   │  !=      │  ==      │  >=      │  <=      │  ``      │
-        //│ m_par    │ m_bkt    │ m_brc    │ m_dqt    │ m_sqt    │   │ m_neq    │ m_deq    │ m_geq    │ m_leq    │ m_btic   │
-            &m_par     &m_bkt     &m_brc     &m_dqt     &m_sqt         &m_neq     &m_deq     &m_geq     &m_leq     &m_btic
+        //│  ()      │  []      │  {}      │  ""      │  ''      │   │  (       │  )       │  [       │  ]       │  ``      │
+        //│ pair+in  │ pair+in  │ pair+in  │ pair+in  │ pair+in  │   │ indiv.   │ indiv.   │ indiv.   │ indiv.   │ pair+in  │
+            &m_par     &m_bkt     &m_brc     &m_dqt     &m_sqt         &kp LPAR   &kp RPAR   &kp LBKT   &kp RBKT   &m_btic
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  =       │  +       │  -       │  *       │  /       │   │  ->      │  =>      │  ::      │  &       │  %       │
-        //│ assign   │ add      │ subtract │ deref/mul│ divide   │   │ C arrow  │ fat arrow│ scope    │ addr/ref │ modulo   │
-            &kp EQUAL  &kp PLUS   &kp MINUS  &kp ASTRK  &kp FSLH       &m_arrow   &m_fat_arrow &m_scope &kp AMPS   &kp PRCNT
+        //│  =       │  +       │  -       │  *       │  /       │   │  {       │  }       │  >=      │  <=      │  %       │
+        //│ assign   │ add      │ subtract │ deref/mul│ divide   │   │ indiv.   │ indiv.   │ geq      │ leq      │ modulo   │
+            &kp EQUAL  &kp PLUS   &kp MINUS  &kp ASTRK  &kp FSLH       &kp LBRC   &kp RBRC   &m_geq     &m_leq     &kp PRCNT
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  ~       │  ^       │  |       │  \       │  #       │   │  `       │  _       │  !       │  ?       │  @       │
-        //│ bitNOT   │ bitXOR   │ bitOR    │ escape   │ preproc  │   │ backtick │ underscore│ NOT/excl│ ternary  │          │
-            &kp TILDE  &kp CARET  &kp PIPE   &kp BSLH   &kp HASH       &kp GRAVE  &kp UNDER  &kp EXCL   &kp QMARK  &kp AT
+        //│  ~       │  ^       │  |       │  \       │  #       │   │  !=      │  ==      │  ->      │  =>      │  ::      │
+        //│ bitNOT   │ bitXOR   │ bitOR    │ escape   │ preproc  │   │ not-eq   │ equality │ C arrow  │fat arrow │ scope    │
+            &kp TILDE  &kp CARET  &kp PIPE   &kp BSLH   &kp HASH       &m_neq     &m_deq     &m_arrow   &m_fat_arrow &m_scope
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
-        //                                 │ [held]   │          │   │ EXIT→→   │          │
-                                             &trans     &trans         &m_exit    &trans
+        //                                 │ [held]   │          │   │ EXIT→→   │  ⌘Tab    │
+        //                                 │          │          │   │          │app switch│
+                                             &trans     &trans         &m_exit    &m_cmd_tab
         //                                 ╰──────────┴──────────╯   ╰──────────┴──────────╯
             >;
         };
@@ -614,16 +685,17 @@
         //│ #include │ #define  │  ()      │  []      │  {}      │   │  NULL    │          │          │          │          │
             &m_inc     &m_def     &m_par     &m_bkt     &m_brc         &m_null    &sk RGUI   &sk RCTRL  &sk RALT   &sk RSHFT
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  m_printf│  m_arrow │  m_deq   │  m_neq   │  m_blk   │   │ CMD+D    │ CMD+F    │ CMD+G    │ CMD+W    │ CMD+/    │
-        //│ printf("")│  ->     │  ==      │  !=      │  /* */   │   │ Duplicate│  Find    │ FindNext │ CloseTab │ Comment  │
+        //│  m_printf│  m_arrow │  m_deq   │  m_neq   │  m_blk   │   │ ⌘D       │ ⌘F       │ ⌘G       │ ⌘W       │ ⌘/       │
+        //│ printf("")│  ->     │  ==      │  !=      │  /* */   │   │ Duplicate│ Find     │ FindNext │ CloseTab │ Comment  │
             &m_printf  &m_arrow   &m_deq     &m_neq     &m_blk_comment &kp LG(D)  &kp LG(F)  &kp LG(G)  &kp LG(W)  &kp LG(FSLH)
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  m_leq   │  m_geq   │  m_scope │ m_fat_arr│ m_line_c │   │ CMD+Z    │ CMD+SHF+Z│ CMD+S    │ CMD+P    │  tog 4   │
-        //│  <=      │  >=      │  ::      │  =>      │  //      │   │  Undo    │  Redo    │  Save    │ CmdPalet │ [exit]   │
-            &m_leq     &m_geq     &m_scope   &m_fat_arrow &m_line_comment &kp LG(Z) &kp LG(LS(Z)) &kp LG(S) &kp LG(P)  &tog 4
+        //│  m_leq   │  m_geq   │  m_scope │ m_fat_arr│ m_line_c │   │ ⌘Z       │ ⌘⇧Z      │ ⌘S       │ ⌘⇧P      │  tog 4   │
+        //│  <=      │  >=      │  ::      │  =>      │  //      │   │ Undo     │ Redo     │ Save     │ CmdPalet │ [exit]   │
+            &m_leq     &m_geq     &m_scope   &m_fat_arrow &m_line_comment &kp LG(Z) &kp LG(LS(Z)) &kp LG(S) &m_cmd_pal &tog 4
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
-        //                                 │          │          │   │          │  EXIT→   │
-                                             &trans     &trans         &trans     &m_exit
+        //                                 │ ⌃⌥ chord │          │   │          │  EXIT→   │
+        //                                 │ IDE mod  │          │   │          │          │
+                                             &m_ctrl_opt &trans        &trans     &m_exit
         //                                 ╰──────────┴──────────╯   ╰──────────┴──────────╯
             >;
         };
