@@ -507,7 +507,7 @@
             &kp DEL    &kp C_MUTE &kp C_VOL_DN &kp C_VOL_UP &kp ESC  &kp LEFT   &kp DOWN   &kp UP     &kp RIGHT  &kp SEMI
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
         //│ PREV     │ PAUSE    │ NEXT     │ REWIND   │ FF       │   │ HOME     │ PG_DN    │ PG_UP    │ END      │ ⌘/ Cmt   │
-            &kp C_PREV &kp C_PAUSE &kp C_NEXT &kp C_RW   &kp C_FF  &kp HOME   &kp PG_DN  &kp PG_UP  &kp END   &kp LG(FSLH)
+            &kp C_PREV &kp C_PP &kp C_NEXT &kp C_RW   &kp C_FF  &kp HOME   &kp PG_DN  &kp PG_UP  &kp END   &kp LG(FSLH)
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
         //                                 │          │          │   │ [held]   │ EXIT→→   │
                                              &trans     &trans         &trans     &m_exit
