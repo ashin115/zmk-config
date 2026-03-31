@@ -1,11 +1,11 @@
 // Copyright (c) 2022 The ZMK Contributors
 // SPDX-License-Identifier: MIT
 
-// ─── C / General Coding Optimised Keymap  (macOS) ────────────────────────────
+// ─── C / General Coding Optimised Keymap  (mac([zmk.dev](https://zmk.dev/docs/keymaps/behaviors/sticky-layer))──
 //
 // Key ideas:
-//  • Bracket-escape macros  — type the pair, cursor lands INSIDE: () [] {} "" '' ``
-//    reached via combos (UI IO OP XC) and Code layer — NOT on Sym row 0
+//  • Bracket-pair macros — type the pair, cursor lands INSIDE: () {} [] "" '' ``
+//    reached via combos (UI OP IO) and Code layer — NOT on Sym row 0
 //  • EXIT→→ macro           — double RIGHT, hops past closing bracket/quote
 //                             Sym right thumb (32), Num right thumb (33), Code/Mod thumbs
 //  • Standard symbol row    — Sym TOP ROW mirrors shift+1–0 exactly:
@@ -16,9 +16,9 @@
 //  • C-specific macros      — -> /* */ // #include <> #define printf("")
 //  • Comparison macros      — != == >= <=  on Code layer + combos
 //  • Cmd+Tab macro          — app switcher on Sym right outer thumb + combo RT
-//  • Combos on natural rolls — SD=Esc  JK=Tab  GH=Mods  JKL=Code  DF=:  CV=CapsWord
+//  • Combos on natural rolls — SD=Esc  JK=Tab  GH=Mods  QA=Code  DF=:
 //                             QW=⌘Z  WE=⌘⇧Z  ZX=⌘S  RT=⌘Tab  ,.=;
-//                             UI={}  IO=[]  OP=()  HJ===  NM=!=  XC=""
+//                             UI=()  IO={}  OP=[]  HJ===  NM=!=  XC=""
 //                             VB=/**/  30+31=//
 //  • All shortcuts use Cmd (⌘) not Ctrl — macOS native
 //
@@ -34,13 +34,7 @@
 //   2  Sym      (left thumb hold)
 //   3  Config   (tri-layer: 1 + 2)
 //   4  Mods     (GH combo toggle)
-//   5  Code     (JKL combo toggle)
-//
-// Key positions (0-indexed, left→right top→bottom):
-//  0  1  2  3  4    5  6  7  8  9
-// 10 11 12 13 14   15 16 17 18 19
-// 20 21 22 23 24   25 26 27 28 29
-//          30 31   32 33
+//   5  Code     (sticky / one-shot, access via QA combo or Mods layer)
 
 #include <behaviors.dtsi>
 #include <dt-bindings/zmk/keys.h>
@@ -63,6 +57,10 @@
 &sk {
     release-after-ms = <2000>;
     quick-release;
+};
+
+&sl {
+    release-after-ms = <2000>;
 };
 
 // ─── Root node ────────────────────────────────────────────────────────────────
@@ -343,10 +341,10 @@
             bindings = <&tog 4>;
         };
 
-        combo_code {          // JKL → Toggle Code layer
+        combo_code {          // AS → One-shot Code layer (much more natural roll)
             timeout-ms = <30>;
-            key-positions = <16 17 18>;
-            bindings = <&tog 5>;
+            key-positions = <10 11>;
+            bindings = <&sl 5>;
         };
 
         combo_colon {         // DF → Colon
@@ -395,22 +393,22 @@
 
         // ── Bracket pair macros (right hand top row) ──────────────────────────
 
-        combo_braces {        // UI → {} pair
+        combo_parens {        // UI → () pair
             timeout-ms = <30>;
             key-positions = <6 7>;
+            bindings = <&m_par>;
+        };
+
+        combo_braces {        // IO → {} pair
+            timeout-ms = <30>;
+            key-positions = <7 8>;
             bindings = <&m_brc>;
         };
 
-        combo_brackets {      // IO → [] pair
-            timeout-ms = <30>;
-            key-positions = <7 8>;
-            bindings = <&m_bkt>;
-        };
-
-        combo_parens {        // OP → () pair
+        combo_brackets {      // OP → [] pair
             timeout-ms = <30>;
             key-positions = <8 9>;
-            bindings = <&m_par>;
+            bindings = <&m_bkt>;
         };
 
         combo_dquotes {       // XC → "" pair
@@ -467,7 +465,7 @@
             bindings = <
         //╭──────────┬──────────┬──────────┬──────────┬──────────╮   ╭──────────┬──────────┬──────────┬──────────┬──────────╮
         //│  Q       │  W       │  E       │  R       │  T       │   │  Y       │  U       │  I       │  O       │  P       │
-        //│[QW=⌘Z]   │[WE=⌘⇧Z]  │          │[RT=⌘Tab] │[RT=⌘Tab] │   │          │[UI={}]   │[IO=[]]   │[OP=()]   │          │
+        //│[QW=⌘Z]   │[WE=⌘⇧Z]  │          │[RT=⌘Tab] │[RT=⌘Tab] │   │          │[UI=()]   │[IO={}]   │[OP=[]]   │          │
             &kp Q      &kp W      &kp E      &kp R      &kp T          &kp Y      &kp U      &kp I      &kp O      &kp P
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
         //│  A       │  S       │  D       │  F       │  G       │   │  H       │  J       │  K       │  L       │  '       │
@@ -491,7 +489,7 @@
         // │                                                                     │
         // │  Row 0 : 1 – 0                                                     │
         // │  Row 1 : media  ←  ↓  ↑  →  ;                                     │
-        // │  Row 2 : ⌘ shortcuts  HOME  PG_DN  PG_UP  END  ⌘/                 │
+        // │  Row 2 : media controls + navigation                                │
         // └─────────────────────────────────────────────────────────────────────┘
         right_layer {
             display-name = "Num";
@@ -500,11 +498,11 @@
         //│  1       │  2       │  3       │  4       │  5       │   │  6       │  7       │  8       │  9       │  0       │
             &kp N1     &kp N2     &kp N3     &kp N4     &kp N5         &kp N6     &kp N7     &kp N8     &kp N9     &kp N0
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  DEL     │  MUTE    │  VOL-    │  VOL+    │  ESC     │   │  ←       │  ↓       │  ↑       │  →       │  ;       │
+        //│ DEL      │ MUTE     │ VOL-     │ VOL+     │ ESC      │   │  ←       │  ↓       │  ↑       │  →       │  ;       │
             &kp DEL    &kp C_MUTE &kp C_VOL_DN &kp C_VOL_UP &kp ESC  &kp LEFT   &kp DOWN   &kp UP     &kp RIGHT  &kp SEMI
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│ ⌘Z Undo  │ ⌘X Cut   │ ⌘C Copy  │ ⌘V Paste │ ⌘A SelAll│  │  HOME    │  PG_DN   │  PG_UP   │  END     │ ⌘/ Cmt   │
-            &kp LG(Z)  &kp LG(X)  &kp LG(C)  &kp LG(V)  &kp LG(A)     &kp HOME   &kp PG_DN  &kp PG_UP  &kp END   &kp LG(FSLH)
+        //│ PREV     │ PAUSE    │ NEXT     │ REWIND   │ FF       │   │ HOME     │ PG_DN    │ PG_UP    │ END      │ ⌘/ Cmt   │
+            &kp C_PREV &kp C_PAUSE &kp C_NEXT &kp C_RW   &kp C_FF  &kp HOME   &kp PG_DN  &kp PG_UP  &kp END   &kp LG(FSLH)
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
         //                                 │          │          │   │ [held]   │ EXIT→→   │
                                              &trans     &trans         &trans     &m_exit
@@ -522,7 +520,7 @@
         // │    =   +   -   *   /      {   }   [   ]   _                        │
         // │                                                                     │
         // │  Row 2 — bitwise / punctuation / misc:                             │
-        // │    ~   ^   |   \   ;      !   @   ?   &   :                        │
+        // │    ~   ^   |   \   ;      <   >   ?   `   :                        │
         // │    (! @ duplicated from row 0 for right-hand-only use)             │
         // │                                                                     │
         // │  Thumbs: EXIT→→ (pos 32)  |  ⌘Tab (pos 33)                        │
@@ -572,7 +570,7 @@
         // │                                                                     │
         // │  Editing / OS shortcuts                                             │
         // │                                                                     │
-        // │  Layer 5 — Code (JKL combo toggle)                                 │
+        // │  Layer 5 — Code (QA sticky combo / one-shot)                       │
         // │  Bracket pairs, snippets, operators, navigation                    │
         // └─────────────────────────────────────────────────────────────────────┘
 
@@ -601,7 +599,7 @@
             &kp LG(Z)  &kp LG(LS(Z)) &kp LG(S) &kp LG(D) &kp LG(F)      &sk RGUI   &sk RCTRL  &sk RALT   &sk RSHFT  &trans
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
         //│ CUT      │ COPY     │ PASTE    │ SEL ALL  │ CMT      │   │ CLOSE    │ PAL      │ CODE     │ MODS     │ EXIT→→   │
-            &kp LG(X)  &kp LG(C)  &kp LG(V)  &kp LG(A)  &kp LG(FSLH)  &kp LG(W) &m_cmd_pal &tog 5    &tog 4    &m_exit
+            &kp LG(X)  &kp LG(C)  &kp LG(V)  &kp LG(A)  &kp LG(FSLH)  &kp LG(W) &m_cmd_pal &sl 5    &tog 4    &m_exit
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
         //│ HOME     │ END      │ PG_DN    │ PG_UP    │ DEL      │   │ BSPC     │ ESC      │          │          │          │
             &kp HOME   &kp END   &kp PG_DN  &kp PG_UP  &kp DEL     &kp BSPC   &kp ESC    &trans     &trans     &trans
@@ -611,3 +609,4 @@
         };
     };
 };
+
