@@ -335,9 +335,9 @@
             bindings = <&kp TAB>;
         };
 
-        combo_mod {           // GH → Toggle Mod layer
+        combo_mod {           // JKL → Toggle Mod layer (restored)
             timeout-ms = <30>;
-            key-positions = <14 15>;
+            key-positions = <16 17 18>;
             bindings = <&tog 4>;
         };
 
