@@ -442,7 +442,7 @@
         compatible = "zmk,keymap";
 
         // ┌─────────────────────────────────────────────────────────────────────┐
-        // │  Layer 0 — Base  (QWERTY + Home Row Mods)                          │
+        // │  Layer 0 — Base  (QWERTY + Home Row Mods)                           │
         // └─────────────────────────────────────────────────────────────────────┘
         //
         // HRM left : A=LSHFT  S=LALT  D=LCTRL  F=LGUI
@@ -475,10 +475,10 @@
         };
 
         // ┌─────────────────────────────────────────────────────────────────────┐
-        // │  Layer 1 — Num  (right thumb hold)                                 │
+        // │  Layer 1 — Num  (right thumb hold)                                  │
         // │                                                                     │
-        // │  Row 0 : 1 – 0                                                     │
-        // │  Row 1 : DEL  media  ←  ↓  ↑  →  ;                                │
+        // │  Row 0 : 1 – 0                                                      │
+        // │  Row 1 : DEL  media  ←  ↓  ↑  →  ;                                  │
         // │  Row 2 : media + brightness + navigation                            │
         // └─────────────────────────────────────────────────────────────────────┘
         right_layer {
@@ -501,18 +501,18 @@
         };
 
         // ┌─────────────────────────────────────────────────────────────────────┐
-        // │  Layer 2 — Sym  (left thumb hold)                                  │
+        // │  Layer 2 — Sym  (left thumb hold)                                   │
         // │                                                                     │
-        // │  Row 0 — standard shift+number row (exactly as on a keyboard):     │
-        // │    !   @   #   $   %      ^   &   *   (   )                        │
+        // │  Row 0 — standard shift+number row (exactly as on a keyboard):      │
+        // │    !   @   #   $   %      ^   &   *   (   )                         │
         // │                                                                     │
-        // │  Row 1 — arithmetic + brackets + BSPC (replaces dup *):            │
-        // │    =   +   -  BSPC /      {   }   [   ]   _                        │
+        // │  Row 1 — arithmetic + brackets + BSPC (replaces dup *):             │
+        // │    =   +   -  BSPC /      {   }   [   ]   _                         │
         // │                                                                     │
-        // │  Row 2 — bitwise / punctuation / EXIT→→ (replaces dup ^):          │
-        // │    ~  EXIT  |   \   ;      <   >   ?   `   :                       │
+        // │  Row 2 — bitwise / punctuation / EXIT→→ (replaces dup ^):           │
+        // │    ~  EXIT  |   \   ;      <   >   ?   `   :                        │
         // │                                                                     │
-        // │  Thumbs: [held] (pos 31)  |  ⌘Tab (pos 33)                        │
+        // │  Thumbs: [held] (pos 31)  |  ⌘Tab (pos 33)                          │
         // └─────────────────────────────────────────────────────────────────────┘
         left_layer {
             display-name = "Sym";
@@ -534,7 +534,7 @@
         };
 
         // ┌─────────────────────────────────────────────────────────────────────┐
-        // │  Layer 3 — Config  (both thumbs held = tri-layer)                  │
+        // │  Layer 3 — Config  (both thumbs held = tri-layer)                    │
         // └─────────────────────────────────────────────────────────────────────┘
         tri_layer {
             display-name = "Config";
@@ -555,11 +555,11 @@
         };
 
         // ┌─────────────────────────────────────────────────────────────────────┐
-        // │  Layer 4 — Mods  (JKL combo toggle)                                │
+        // │  Layer 4 — Mods  (JKL combo toggle)                                 │
         // │                                                                     │
-        // │  FIX: mod_layer is now defined FIRST so ZMK assigns it index 4,    │
-        // │  matching all combo bindings (&tog 4) and self-references (&tog 4) │
-        // │  inside the layer. code_layer follows at index 5, matching &sl 5.  │
+        // │  FIX: mod_layer is now defined FIRST so ZMK assigns it index 4,     │
+        // │  matching all combo bindings (&tog 4) and self-references (&tog 4)  │
+        // │  inside the layer. code_layer follows at index 5, matching &sl 5.   │
         // └─────────────────────────────────────────────────────────────────────┘
 
         mod_layer {
@@ -580,8 +580,8 @@
         };
 
         // ┌─────────────────────────────────────────────────────────────────────┐
-        // │  Layer 5 — Code  (sticky / one-shot, via AS combo or Mods layer)   │
-        // │  Bracket pairs, snippets, operators, navigation                    │
+        // │  Layer 5 — Code  (sticky / one-shot, via AS combo or Mods layer)    │
+        // │  Bracket pairs, snippets, operators, navigation                     │
         // └─────────────────────────────────────────────────────────────────────┘
         code_layer {
             display-name = "Code";
@@ -593,7 +593,7 @@
         //│  ->      │  =>      │  ::      │  !=      │  ==      │   │  >=      │  <=      │ /* */    │ //       │ NULL     │
             &m_arrow   &m_fat_arrow &m_scope  &m_neq     &m_deq        &m_geq     &m_leq     &m_blk_comment &m_line_comment &m_null
         //├──────────┼──────────┼──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┼──────────┼──────────┤
-        //│  HOME    │  END     │  LEFT    │  RIGHT   │  TAB     │   │  DEL     │  ESC     │  ⌘Tab    │  ⌘⇧P    │  EXIT→→  │
+        //│  HOME    │  END     │  LEFT    │  RIGHT   │  TAB     │   │  DEL     │  ESC     │  ⌘Tab    │  ⌘⇧P     │  EXIT→→  │
             &kp HOME   &kp END    &kp LEFT   &kp RIGHT  &kp TAB       &kp DEL    &kp ESC    &m_cmd_tab &m_cmd_pal &m_exit
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
                                              &trans     &trans        &trans     &trans
