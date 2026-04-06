@@ -528,7 +528,7 @@
             &kp TILDE  &m_exit    &kp PIPE   &kp BSLH   &kp SEMI       &kp LT     &kp GT     &kp QMARK  &kp GRAVE  &kp COLON
         //╰──────────┴──────────┴──────────┼──────────┼──────────┤   ├──────────┼──────────┼──────────┴──────────┴──────────╯
         //                                 │          │ [held]   │   │          │  ⌘Tab    │
-                                             &trans     &trans         &trans    &m_cmd_tab
+                                             &trans     &trans         &trans    &trans 
         //                                 ╰──────────┴──────────╯   ╰──────────┴──────────╯
             >;
         };
